@@ -2,7 +2,7 @@
 
 namespace AppDev.Controllers
 {
-    public class JobController : Controller
+    public class BookController : Controller
     {
         public IActionResult Index()
         {
