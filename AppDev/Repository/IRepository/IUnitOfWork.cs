@@ -2,8 +2,8 @@
 {
 	public interface IUnitOfWork
 	{
-		ICategoryRepository CategoryRepository { get; }
-		IBookRepository BookRepository { get; }
-		void Save();
-	}
+        ICategoryRepository CategoryRepository { get; }
+        IBookRepository BookRepository { get; }
+        void Save();
+    }
 }
