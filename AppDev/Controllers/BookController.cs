@@ -1,4 +1,4 @@
-﻿using AppDev.Models;
+﻿using AppDev.Models.ViewModels;
 using AppDev.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,37 +6,46 @@ namespace AppDev.Controllers
 {
     public class BookController : Controller
     {
-
-        private readonly IBookRepository _BookRepository;
-        public BookController(IBookRepository BookRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public BookController(IUnitOfWork unitOfWork)
         {
-            _BookRepository = BookRepository;
+            _unitOfWork = unitOfWork;
         }
         public IActionResult Index()
         {
-            List<Book> books = _BookRepository.GetAll().ToList();
-            return View(books);
+            List<Book> myList = _unitOfWork.BookRepository.GetAll("Category").ToList();
+            return View(myList);
         }
-
         public IActionResult Create()
         {
-            return View();
+            BookVM bookVM = new BookVM()
+            {
+                Categories = _unitOfWork.CategoryRepository.GetAll().Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem()
+                {
+                    Text = c.Name,
+                    Value = c.Id.ToString(),
+                }),
+                Book = new Book()
+            };
+            return View(bookVM);
         }
         [HttpPost]
-        public IActionResult Create(Book book)
+        public IActionResult Create(BookVM bookVM)
         {
-            if (book.Title == book.Description)
-            {
-                ModelState.AddModelError("Description", "Description must be different than Name");
-            }
+
             if (ModelState.IsValid)
             {
-                _BookRepository.Add(book);
-                _BookRepository.Save();
-                TempData["Success"] = "Add Book Success";
+                _unitOfWork.BookRepository.Add(bookVM.Book);
+                _unitOfWork.BookRepository.Save();
+                TempData["success"] = "Book created successfully";
                 return RedirectToAction("Index");
             }
-            return View();
+            bookVM.Categories = _unitOfWork.CategoryRepository.GetAll().Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem()
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+            });
+            return View(bookVM);
         }
         public IActionResult Edit(int? id)
         {
@@ -44,24 +53,35 @@ namespace AppDev.Controllers
             {
                 return NotFound();
             }
-            Book? book = _BookRepository.Get(b => b.Id == id);
-            if (book == null)
+            BookVM bookVM = new BookVM()
             {
-                return NotFound();
-            }
-            return View(book);
+                Categories = _unitOfWork.CategoryRepository.GetAll().Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem()
+                {
+                    Text = c.Name,
+                    Value = c.Id.ToString(),
+                }),
+                Book = _unitOfWork.BookRepository.Get(c => c.Id == id)
+            };
+            bookVM.Categories = _unitOfWork.CategoryRepository.GetAll().Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem()
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+            });
+            return View(bookVM);
+
         }
         [HttpPost]
-        public IActionResult Edit(Book book)
+        public IActionResult Edit(BookVM bookVM)
         {
+
             if (ModelState.IsValid)
             {
-                _BookRepository.Update(book);
-                _BookRepository.Save();
-                TempData["Success"] = "Edit Book Success";
+                _unitOfWork.BookRepository.Update(bookVM.Book);
+                _unitOfWork.Save();
+                TempData["success"] = "Book edited successfully";
                 return RedirectToAction("Index");
             }
-            return View();
+            return View(bookVM);
         }
         public IActionResult Delete(int? id)
         {
@@ -69,23 +89,21 @@ namespace AppDev.Controllers
             {
                 return NotFound();
             }
-            Book? book = _BookRepository.Get(b => b.Id == id);
-            if (book == null)
+            Book? Book = _unitOfWork.BookRepository.Get(c => c.Id == id, "Category");
+            if (Book == null)
             {
                 return NotFound();
             }
-            return View(book);
+            return View(Book);
         }
         [HttpPost]
-        public IActionResult Delete(Book book)
+        public IActionResult Delete(Book Book)
         {
 
-            _BookRepository.Delete(book);
-            _BookRepository.Save();
-            TempData["Success"] = "Delete Book Success";
+            _unitOfWork.BookRepository.Delete(Book);
+            _unitOfWork.Save();
+            TempData["success"] = "Book deleted successfully";
             return RedirectToAction("Index");
-        }
-        public void SetViewBag() { 
         }
     }
 }
