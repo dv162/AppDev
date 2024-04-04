@@ -2,10 +2,12 @@ using AppDev.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace AppDev.Controllers
+namespace AppDev.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class HomeController : Controller
     {
+        
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)

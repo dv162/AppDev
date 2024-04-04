@@ -1,10 +1,10 @@
-﻿using AppDev.Data;
-using AppDev.Models;
+﻿using AppDev.Models;
 using AppDev.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AppDev.Controllers
+namespace AppDev.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;

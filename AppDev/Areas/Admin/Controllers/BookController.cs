@@ -2,8 +2,9 @@
 using AppDev.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AppDev.Controllers
+namespace AppDev.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class BookController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
